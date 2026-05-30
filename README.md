@@ -49,32 +49,32 @@ This system solves that by delivering:
 ### 1️⃣ Schedule Trigger
 Each bot runs at a fixed time using n8n schedule triggers.
 
----
+
 
 ### 2️⃣ RSS Read Nodes
 Each bot fetches articles from 80+ news websites using RSS feeds.
 
----
+
 
 ### 3️⃣ Filter Node
 Filters only **recent articles** (removes old/outdated news).
 
----
+
 
 ### 4️⃣ Merge Node
 Combines multiple RSS feeds into a single stream per domain.
 
----
+
 
 ### 5️⃣ Loop Over Items
 Processes each article one by one for better handling.
 
----
+
 
 ### 6️⃣ Wait Node
 Adds delay between messages to avoid API rate limits.
 
----
+
 
 ### 7️⃣ HTTP Request Node (Groq AI)
 Each article is processed using:
@@ -86,7 +86,7 @@ AI performs:
 - Creates structured summary
 - Generates Telegram-ready format
 
----
+
 
 ### 8️⃣ Telegram Node
 Final output is sent to:
