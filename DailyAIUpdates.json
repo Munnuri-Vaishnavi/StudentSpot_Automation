@@ -1,0 +1,798 @@
+{
+  "name": "DailyAIUpdates",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            },
+            {
+              "triggerAtHour": 21,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        16
+      ],
+      "id": "2ce2fb24-a9a9-493c-b191-a27dfd6e4ed5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a strict AI news curator for StudentSpot, an AI news bot for undergraduate and graduate students in India.\\n\\nSTEP 1 - FILTER:\\nFirst strictly filter out any article that is NOT related to:\\n- Artificial Intelligence research or breakthroughs\\n- Machine Learning and Deep Learning\\n- Large Language Models and Generative AI\\n- AI tools, products and platforms\\n- AI ethics, safety and policy\\n- Computer Vision and Natural Language Processing\\n- AI startups and funding\\n\\nSTRICTLY IGNORE and SKIP any article about:\\n- General technology not related to AI\\n- Politics, government, war\\n- Sports, entertainment, movies\\n- Health, medicine not related to AI\\n- Business not related to AI\\n- Any non-AI topic\\n\\nSTEP 2 - CATEGORIZE:\\nFor each filtered article, read the content carefully and assign the most accurate category based on what the article is actually about. Choose a short clear category name with relevant emoji that truly matches the content. Never hardcode categories.\\n\\nSTEP 3 - WRITE SUMMARY:\\nWrite summary with dynamic subheadings based on article content. You MUST wrap every subheading with asterisks like this: *Subheading:* — never skip asterisks on subheadings.\\n\\nUsing ONLY these real articles. Use the EXACT links — do not make up links!\\n\\nArticles:\\n\" + $json.title + \"\\n\" + $json.link + \"\\n\" + $json.contentSnippet + \"\\n\\nFormat EXACTLY like this:\\n\\n*🤖 AI Daily Updates 🤖*\\n\\n*[Category Emoji] [Category Name]*\\n*📌 [Title]*\\n\\n[One clear sentence explaining the update simply]\\n\\n*[Subheading based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n*[Subheading based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n🔗 [exact link]\\n\\n*💡 Stay ahead in AI. Keep learning!*\\n*— Student Spot 🎓*\\n\\nRULES:\\n- Only process 100% AI related articles\\n- Skip all non-AI content completely with no message\\n- Never hardcode category names\\n- Never hardcode subheadings — pick naturally based on article content\\n- ALWAYS wrap subheadings with asterisks — mandatory\\n- Use 2 to 3 subheadings only as needed\\n- Always use • for bullet points\\n- Bullet points must be plain text — never bold\\n- Category must match actual content\\n- Simple English only\\n- Medium length — not too short not too long\\n- Maximum 1 article per message\\n- Pick top 4 most important and trending articles\\n- Always include exact link\\n- If all articles are irrelevant send nothing\\n- NEVER use special characters like _ or ` in the output\"\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3712,
+        560
+      ],
+      "id": "53bf0e8c-a0dc-44c7-9474-15d67ec4d04c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json[\"choices\"][0][\"message\"][\"content\"]}} ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        160
+      ],
+      "id": "cf4dc726-f35e-4306-a5cb-6ee5633bb263",
+      "name": "Send a text message",
+      "webhookId": "8ce1023b-a185-47bd-ad8a-41d88a103fc2",
+      "credentials": {
+        "telegramApi": {
+          "id": "UvekhdeYaPD9fg0h",
+          "name": "Telegram account 13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "51d45ece-6c4f-495d-8e19-5ec2b786c661",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        368
+      ],
+      "id": "7be4d896-62be-41d1-960a-92e27873caeb",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6fe43f92-958e-4658-86c1-1a68e939daa6",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        176
+      ],
+      "id": "1e74a1fd-f1a0-41ca-86d0-92c05447dc80",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "daeaa08e-1c6e-4a8e-b38e-3c6ccbf15dee",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        0
+      ],
+      "id": "95ba1c58-5e26-4776-adbb-223fac4710c6",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8e6a9f91-e4dc-4648-bc9a-e9cfdefff500",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        -176
+      ],
+      "id": "bb698d55-0d4e-42f1-9d69-7df493bf7f42",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cbe99a94-cb03-4faf-803f-c1a81266be67",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        -368
+      ],
+      "id": "eebf5a18-2246-4144-be3a-8a318017e715",
+      "name": "Filter5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67e08643-acc6-449f-b490-58bcaa8a09c0",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        480
+      ],
+      "id": "0834539f-16d9-4920-94b2-d8d251227299",
+      "name": "Filter2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2288,
+        480
+      ],
+      "id": "e0a56445-ae81-4109-8736-10024d0cb1fc",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "https://www.marktechpost.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        448
+      ],
+      "id": "88067f45-9a9f-4811-9775-82058976aafb",
+      "name": "RSS Read",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.kdnuggets.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        272
+      ],
+      "id": "14d1a9ab-1abd-413b-9243-9740f0d1e6a1",
+      "name": "RSS Read1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://bair.berkeley.edu/blog/feed.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        592
+      ],
+      "id": "8b57a06a-5962-4df7-abd4-522e6cf11f4e",
+      "name": "RSS Read2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://aitrends.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "c6924ec8-bf98-406f-8508-3ee36923bcac",
+      "name": "RSS Read3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://dailyai.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "6ea2f276-f813-4042-92cc-957e07029e64",
+      "name": "RSS Read4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/blogspot/gJZg ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -384
+      ],
+      "id": "96ea813a-1394-43c8-b587-18f816dcba25",
+      "name": "RSS Read5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2720,
+        80
+      ],
+      "id": "b7279b40-38f4-456a-bf8e-04966a9059ea",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3344,
+        576
+      ],
+      "id": "7c934f77-cb30-4f2f-b632-0fedfb0359dc",
+      "name": "Wait",
+      "webhookId": "2e259c80-0949-4fce-81dc-1a4aa832e476"
+    },
+    {
+      "parameters": {
+        "url": "https://blog.google/technology/ai/rss/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        800
+      ],
+      "id": "30fc140f-0f29-42c5-9991-7dfce403b52a",
+      "name": "RSS Read6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://openai.com/news/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        1008
+      ],
+      "id": "4a9e2648-5b8d-467a-a0e7-c0a19ced64ac",
+      "name": "RSS Read7",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "520f84b1-c6b5-479c-adaa-5b0e571a9b2b",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        784,
+        752
+      ],
+      "id": "c78c1baa-b08c-443c-a934-8c256a11210b",
+      "name": "Filter6",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2fdc2b35-2596-4240-9c93-9ae5dd65cd61",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        160,
+        1008
+      ],
+      "id": "50827237-93c8-4760-8f35-940c24755641",
+      "name": "Filter7",
+      "alwaysOutputData": false
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read3": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read4": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read5": {
+      "main": [
+        [
+          {
+            "node": "Filter5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read6": {
+      "main": [
+        [
+          {
+            "node": "Filter6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read7": {
+      "main": [
+        [
+          {
+            "node": "Filter7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter6": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Filter7": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 7
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "974b36ba-3596-48f5-adb3-25da0bb88a33",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a164a65216d3991a4ca18bfbf5dd96e6c0f41a3ea9adf8fbef99fa6b606035b"
+  },
+  "id": "SdmjU4eC9Tvbieqr",
+  "tags": []
+}

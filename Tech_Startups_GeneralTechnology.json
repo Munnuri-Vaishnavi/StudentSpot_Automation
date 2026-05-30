@@ -1,0 +1,792 @@
+{
+  "name": "Tech_Startups_GeneralTechnology",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10,20 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        16
+      ],
+      "id": "810d59de-bcbd-48e0-9db3-a1be27d3e2d8",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a strict tech news curator for StudentSpot, a tech news bot for undergraduate and graduate students in India.\\n\\nSTEP 1 - FILTER:\\nFirst strictly filter out any article that is NOT related to:\\n- Technology products or software\\n- AI and machine learning\\n- Startups and tech companies\\n- Gadgets and consumer electronics\\n- Internet and cybersecurity\\n- Engineering and innovation\\n\\nSTRICTLY IGNORE and SKIP any article about:\\n- Puzzles, crosswords, games\\n- Medicine, health, cancer, biology\\n- Politics, government, war\\n- Entertainment, movies, TV shows\\n- Sports, celebrities\\n- Fashion, lifestyle\\n- Any non-technology topic\\n\\nSTEP 2 - CATEGORIZE:\\nRead the article carefully and assign the most accurate category based on actual content. Choose a short clear category name with relevant emoji. Never hardcode.\\n\\nSTEP 3 - WRITE SUMMARY:\\nWrite summary with dynamic subheadings based on article content.\\n\\nUsing ONLY these real articles. Use the EXACT links — do not make up links!\\n\\nArticles:\\n\" + $json.title + \"\\n\" + $json.link + \"\\n\" + $json.contentSnippet + \"\\n\\nFormat EXACTLY like this:\\n\\n🌐 *TechWorld Daily Update* 🌐\\n\\n[Category Emoji] *[Category Name]*\\n📌 *[Title]*\\n\\n[One clear sentence explaining the update simply]\\n\\n*[Subheading based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n*[Subheading based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n🔗 [exact link]\\n\\n💡 *Stay curious. Keep building!*\\n— Student Spot 🎓\\n\\nRULES:\\n- Never hardcode subheadings — pick naturally based on article content\\n- Never hardcode category names\\n- Always use • for bullet points\\n- Simple English only\\n- Medium length — not too short not too long\\n- Never fabricate facts\\n- Skip irrelevant articles silently with no message\\n- If ALL articles irrelevant send nothing\\n- Maximum 1 articles per message Pick top 4 most important and trending articles\\n- Always include exact link\"\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3712,
+        560
+      ],
+      "id": "1f55f894-b52e-4490-b34d-ac27ee72bc25",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json[\"choices\"][0][\"message\"][\"content\"]}} ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        160
+      ],
+      "id": "dc7ce761-34b5-4ea2-9770-af2953369d11",
+      "name": "Send a text message",
+      "webhookId": "72413d9b-f225-4a57-87b7-d9c19be8e7ae",
+      "credentials": {
+        "telegramApi": {
+          "id": "uBfPGfzZRJFB5b6R",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "51d45ece-6c4f-495d-8e19-5ec2b786c661",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        368
+      ],
+      "id": "fb50d425-cf78-4745-b8ec-4beabd6e3a47",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6fe43f92-958e-4658-86c1-1a68e939daa6",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        176
+      ],
+      "id": "65813356-1503-4335-ab87-53662c468fe0",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "daeaa08e-1c6e-4a8e-b38e-3c6ccbf15dee",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        0
+      ],
+      "id": "e95dfca9-dfa7-44e5-9f9c-fed838700375",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8e6a9f91-e4dc-4648-bc9a-e9cfdefff500",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        -176
+      ],
+      "id": "49916c09-7985-4891-ab83-460d655fc154",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "cbe99a94-cb03-4faf-803f-c1a81266be67",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1104,
+        -368
+      ],
+      "id": "6b56beec-b618-4b93-ab5f-67e8c137ec80",
+      "name": "Filter5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67e08643-acc6-449f-b490-58bcaa8a09c0",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        480
+      ],
+      "id": "3971cb0d-9709-44ab-b54d-c448d8b14704",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 8
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2288,
+        480
+      ],
+      "id": "b6af1b5b-3cab-4fa2-be4d-04050cd2d96b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/index.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        448
+      ],
+      "id": "238f3598-a977-482b-97dd-21821b04672a",
+      "name": "RSS Read",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.wired.com/feed/rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        272
+      ],
+      "id": "4392af56-fd37-4326-980b-265e2bd6e294",
+      "name": "RSS Read1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        592
+      ],
+      "id": "a588f253-6203-4931-90b7-1f47b59b6913",
+      "name": "RSS Read2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.zdnet.com/news/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "a842700c-4e77-4fb2-934c-6ebb841a5d79",
+      "name": "RSS Read3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://venturebeat.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "77b40f2d-b1f1-4561-a750-1c2dcd89efa1",
+      "name": "RSS Read4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.technologyreview.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -384
+      ],
+      "id": "9b035852-0b25-4bcb-9273-f46bf14716d0",
+      "name": "RSS Read5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2720,
+        80
+      ],
+      "id": "0c66c3f6-7876-43d4-b513-ab5482eda453",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3344,
+        576
+      ],
+      "id": "b2181d64-e1ae-48f9-84aa-d8cebffe60a7",
+      "name": "Wait",
+      "webhookId": "805f6118-e14e-4a35-9ef9-ad0bb107b669"
+    },
+    {
+      "parameters": {
+        "url": "https://thenextweb.com/feed/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        800
+      ],
+      "id": "12e4eb4f-68a6-444e-9e29-900fe6745663",
+      "name": "RSS Read6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.engadget.com/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        1008
+      ],
+      "id": "9d1552b3-bc84-4de6-8a2f-620cc34660a0",
+      "name": "RSS Read7",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "548b9a6a-bf45-4921-98f5-f18ea51c9719",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        656,
+        720
+      ],
+      "id": "88529c8d-1fee-4fe2-8130-64a3062a51aa",
+      "name": "Filter6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6e946ecb-fc26-470c-9829-0ef11b9b5b43",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        992
+      ],
+      "id": "8c382c94-f1ce-457e-a119-2f4281db86b6",
+      "name": "Filter7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read3": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read4": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read5": {
+      "main": [
+        [
+          {
+            "node": "Filter5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read6": {
+      "main": [
+        [
+          {
+            "node": "Filter6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read7": {
+      "main": [
+        [
+          {
+            "node": "Filter7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter6": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Filter7": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 7
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "97de1351-b3ab-4b0a-acca-52883b1bb5fb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a164a65216d3991a4ca18bfbf5dd96e6c0f41a3ea9adf8fbef99fa6b606035b"
+  },
+  "id": "u46dZ3YUlpTVODxS",
+  "tags": []
+}

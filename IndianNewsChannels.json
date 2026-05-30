@@ -1,0 +1,717 @@
+{
+  "name": "IndianNewsChannels",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 8,18 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -240,
+        16
+      ],
+      "id": "d165bf00-cba2-476d-9ea0-69720ea2ade6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "YOUR_GROQ_API_KEY"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n\n  \"model\": \"llama-3.3-70b-versatile\",\n\n  \"messages\": [\n\n    {\n\n      \"role\": \"user\",\n\n      \"content\": \"You are a smart news curator for StudentSpot, an Indian news bot for undergraduate and graduate students in India.\\n\\nUsing ONLY these real articles, write a Telegram post. Use the EXACT links — do not make up links!\\n\\nFor each article, automatically identify the most fitting category based on the article content. Choose a short, clear category name with a relevant emoji that best describes the article topic. Don't limit to fixed categories — use your judgment based on what the article is actually about.\\n\\nArticles:\\n\" + $json.title + \"\\n\" + $json.link + \"\\n\" + $json.contentSnippet + \"\\n\\nFormat EXACTLY like this:\\n\\n🇮🇳 *Daily India News Update* 🇮🇳\\n\\n[Category Emoji] *[Category Name]*\\n📌 *[Title]*\\n\\n*[Subheading 1 based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n*[Subheading 2 based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n*[Subheading 3 based on content]:*\\n• [bullet point]\\n• [bullet point]\\n\\n🔗 [exact link]\\n\\n💡 *Stay informed. Stay ahead!*\\n— Student Spot 🎓\\n\\nRULES:\\n- Never hardcode subheadings — choose subheadings that naturally fit the article content\\n- Subheading examples based on content type: What Happened, Why It Matters, Impact on India, What to Watch, Key Highlights, What Changed, What Next, How This Affects You, The Big Picture — use only what fits\\n- Simple English only — student friendly\\n- Bullet points must be short and clear\\n- Total summary not too short not too long — medium size like a professional update\\n- Reader must fully understand without opening link\\n- Never hardcode category names\\n- Only show categories that have actual articles\\n- Maximum 1 articles per message Pick top 4 most important and trending articles\\n- Always include exact link after each article\"\n\n    }\n\n  ]\n\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3712,
+        560
+      ],
+      "id": "2fcd010b-7fa6-46f4-98a3-4ae5dd5290dd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json[\"choices\"][0][\"message\"][\"content\"]}} ",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4000,
+        160
+      ],
+      "id": "4f574582-59fe-42d8-b124-b64e0815ae46",
+      "name": "Send a text message",
+      "webhookId": "4f4739ae-78e8-44d8-bfe1-e195174dbcc5",
+      "credentials": {
+        "telegramApi": {
+          "id": "9sEO1e3WqWYp30Or",
+          "name": "Telegram account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "51d45ece-6c4f-495d-8e19-5ec2b786c661",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        848,
+        368
+      ],
+      "id": "7ba6d499-417d-4d3c-9113-2d67e85e270c",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6fe43f92-958e-4658-86c1-1a68e939daa6",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        176
+      ],
+      "id": "95403a58-ef95-476a-9de4-782cde3323c5",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "daeaa08e-1c6e-4a8e-b38e-3c6ccbf15dee",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        912,
+        0
+      ],
+      "id": "1d200b8d-32d0-48d8-b9ec-24f00e489189",
+      "name": "Filter3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8e6a9f91-e4dc-4648-bc9a-e9cfdefff500",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1232,
+        -176
+      ],
+      "id": "524d0c29-4323-48b4-9f06-a597f7b70816",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "67e08643-acc6-449f-b490-58bcaa8a09c0",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        480
+      ],
+      "id": "cb2e8cf4-27ba-451c-beb1-429e43f803df",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 7
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2288,
+        480
+      ],
+      "id": "b17ec84c-571f-4d3f-aa32-738a7ca74395",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "url": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        448
+      ],
+      "id": "d70cc6f9-89e5-4c22-9510-f329c066fa1f",
+      "name": "RSS Read",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.thehindu.com/feeder/default.rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        272
+      ],
+      "id": "17d0e87f-b2fa-4fdc-a1c3-0a93af93ccdb",
+      "name": "RSS Read1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        592
+      ],
+      "id": "8052ad27-d7dd-4205-bb92-dcf0696a61b2",
+      "name": "RSS Read2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.dnaindia.com/feeds/india.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "0dfd1b7a-7e7a-4ccb-8ba4-333ba2f5b60b",
+      "name": "RSS Read3",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://www.newslaundry.com/feed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "36376c5e-4a98-44ef-8c73-886dfce6750d",
+      "name": "RSS Read4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2720,
+        80
+      ],
+      "id": "1a1232e4-8770-46d9-90d3-d94874630abf",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3344,
+        576
+      ],
+      "id": "68ef36fd-42f9-4256-8da1-f3e357fd3cfb",
+      "name": "Wait",
+      "webhookId": "2a1d3041-7df1-4584-b40c-6ab84f54ffd1"
+    },
+    {
+      "parameters": {
+        "url": "https://www.indiatoday.in/rss/home",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        800
+      ],
+      "id": "ea7b8975-5898-481a-8ddd-f345d270e60f",
+      "name": "RSS Read6",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/ndtvnews-top-stories",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -48,
+        1008
+      ],
+      "id": "8ef20ca0-a7e5-49d1-baf7-83b3d87f6285",
+      "name": "RSS Read7",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5d11157d-c735-4729-a3b5-39ddac85ba0c",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        976
+      ],
+      "id": "ac218f59-5479-49e9-8467-67f61d926ed1",
+      "name": "Filter6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "612f41ac-ce9f-4f0c-aae1-db90e49b1328",
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus({hours: 10}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        1024,
+        752
+      ],
+      "id": "7ede1cce-43e1-4db1-866a-3cfd07704618",
+      "name": "Filter7"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS Read7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read1": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read2": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read3": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read4": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read6": {
+      "main": [
+        [
+          {
+            "node": "Filter7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read7": {
+      "main": [
+        [
+          {
+            "node": "Filter6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter6": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Filter7": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "befa639e-4cfa-4486-9101-5784695a235c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3a164a65216d3991a4ca18bfbf5dd96e6c0f41a3ea9adf8fbef99fa6b606035b"
+  },
+  "id": "o5vZlo8OP2sBEHVu",
+  "tags": []
+}
