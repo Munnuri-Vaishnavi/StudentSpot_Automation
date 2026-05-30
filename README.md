@@ -13,6 +13,9 @@ It automatically:
 - Runs fully automatically (no manual work)
 
 ---
+<img width="1920" height="1020" alt="Screenshot 2026-05-20 150447" src="https://github.com/user-attachments/assets/c8dcd50d-498c-4f0d-9c4f-9f44d6a3c08e" />
+<img width="1920" height="1020" alt="Screenshot 2026-05-20 151224" src="https://github.com/user-attachments/assets/2dceca3f-62d6-449c-b1ae-68d006b7dc85" />
+
 
 ## 🎯 Why was this built?
 
@@ -185,3 +188,4 @@ Founder of *The StudentSpot 🎓*
 ---
 
 > Stay curious. Keep building. 🚀
+
